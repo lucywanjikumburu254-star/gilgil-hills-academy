@@ -1,10 +1,55 @@
 "use client";
 
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useRef, useState } from "react";
 
 type ChatMessage = { role: "user" | "assistant"; text: string };
 
-const quickQuestions = [
+
+function formatInline(text: string): ReactNode[] {
+  return text.split(/(\\*\\*[^*]+\\*\\*)/g).map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={index}>{part.slice(2, -2)}</strong>;
+    }
+    return <span key={index}>{part}</span>;
+  });
+}
+
+function AssistantReply({ text }: { text: string }) {
+  const lines = text.split("\\n");
+  const blocks: ReactNode[] = [];
+  let listItems: string[] = [];
+
+  const flushList = () => {
+    if (!listItems.length) return;
+    blocks.push(
+      <ul className="hills-reply-list" key={`list-${blocks.length}`}>
+        {listItems.map((item, index) => <li key={index}>{formatInline(item)}</li>)}
+      </ul>
+    );
+    listItems = [];
+  };
+
+  lines.forEach((rawLine, index) => {
+    const line = rawLine.trim();
+    if (!line) {
+      flushList();
+      return;
+    }
+    if (/^[-•*]\\s+/.test(line)) {
+      listItems.push(line.replace(/^[-•*]\\s+/, ""));
+      return;
+    }
+    flushList();
+    if (/^#{1,3}\\s+/.test(line)) {
+      blocks.push(<h4 className="hills-reply-heading" key={index}>{formatInline(line.replace(/^#{1,3}\\s+/, ""))}</h4>);
+    } else {
+      blocks.push(<p className="hills-reply-paragraph" key={index}>{formatInline(line)}</p>);
+    }
+  });
+  flushList();
+  return <div className="hills-assistant-reply">{blocks}</div>;
+}
+\nconst quickQuestions = [
   { label: "Our academics", icon: "▤", prompt: "Tell me about the academic programmes and grade levels." },
   { label: "Admissions", icon: "▣", prompt: "How do I apply for admission?" },
   { label: "School fees", icon: "▱", prompt: "How can I get the current school fees?" },
@@ -81,7 +126,7 @@ export default function HillsAssistant() {
             </div>
             {messages.map((message, index) => (
               <div className={message.role === "user" ? "hills-message hills-user-message" : "hills-message hills-assistant-message"} key={index}>
-                <div className="hills-bubble"><p>{message.text}</p></div>
+                <div className="hills-bubble">{message.role === "assistant" ? <AssistantReply text={message.text} /> : <p>{message.text}</p>}</div>
               </div>
             ))}
             {sending && <div className="hills-message hills-assistant-message"><div className="hills-bubble hills-typing"><i /><i /><i /><span>Thinking…</span></div></div>}
