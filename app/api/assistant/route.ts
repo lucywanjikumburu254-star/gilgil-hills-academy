@@ -210,113 +210,69 @@ function getInstantFeeReply(question: string): string | null {
   return null;
 }
 
+function getKnowledgeReply(question: string): string {
+  const q = question.toLowerCase();
+  const fees = getInstantFeeReply(question);
+  if (fees) return fees;
+
+  if (/\\b(where|location|located|address|directions|wapi|mahali)\\b/.test(q)) {
+    return "Gilgil Hills Academy is off the Gilgil–Nyahururu Road, about 2 km towards the Anti-Stock Theft Unit, Gilgil, Nakuru County. You can call **0794 952 635** or **0710 308 818** for directions.";
+  }
+  if (/\\b(contact|phone|telephone|call|whatsapp|email|reach)\\b/.test(q)) {
+    return "You can contact Gilgil Hills Academy on **0794 952 635** or **0710 308 818**. Email: **Gilgilhillsacademy2026@gmail.com**.";
+  }
+  if (/\\b(hour|hours|open|office time|working time|when.*office)\\b/.test(q)) {
+    return "The school office hours are **Monday–Friday, 8:00am–4:00pm**, and **Saturday, 9:00am–12:00pm**. These are office hours, not learner reporting hours.";
+  }
+  if (/\\b(motto|slogan)\\b/.test(q)) {
+    return "The school motto is **“Excellence in All We Do.”**";
+  }
+  if (/\\b(grade|class|level|section|academic|programme|program|school offer|curriculum)\\b/.test(q)) {
+    return "Gilgil Hills Academy offers **Pre-Primary (Playgroup, PP1 and PP2)**, **Lower Primary (Grades 1–3)**, **Upper Primary (Grades 4–6)** and **Junior Secondary (Grades 7–9)**. Day-school and boarding options are available in the relevant sections. Which grade are you enquiring about?";
+  }
+  if (/\\b(boarding|boarder|dorm|hostel)\\b/.test(q)) {
+    return "Gilgil Hills Academy offers boarding, with separate boys' and girls' boarding arrangements in Junior Secondary. Boarding requirements and fees differ by section and gender. Tell me the learner's **grade** and whether the learner is a **boy or girl**, and I can share the relevant information.";
+  }
+  if (/\\b(requirement|requirements|what.*bring|shopping|uniform|items|checklist)\\b/.test(q)) {
+    return "I can share the official admission checklist. Please tell me the learner's **grade** and whether the learner is a **boy or girl** so I give you the correct list. Boys' and girls' requirements are different.";
+  }
+  if (/\\b(apply|application|admission|enrol|enroll|register|join|vacanc|admit)\\b/.test(q)) {
+    return "To begin an admission enquiry, use the **Apply for admission** form in this chat. Complete the parent/guardian and learner details, then submit it. The form sends an enquiry to the school's admissions email when email delivery is configured. Submission is not confirmation of a place.";
+  }
+  if (/\\b(transport|bus|pick.?up|drop.?off)\\b/.test(q)) {
+    return "The information currently provided to me does not include confirmed transport routes or charges. Please contact the school office on **0794 952 635** or **0710 308 818** for the latest details.";
+  }
+  if (/\\b(activity|activities|club|clubs|sports|games|co.?curricular)\\b/.test(q)) {
+    return "Junior Secondary learners are required to join at least one club. For the current list of clubs, sports and activities across the school, please confirm with the school office on **0794 952 635**.";
+  }
+  if (/\\b(pay|payment|paybill|bank|account number|deposit)\\b/.test(q)) {
+    return "Payment details depend on the learner's section and the type of fee. Please tell me the **grade** and whether the learner is a **day scholar or boarder**. For safety, always verify payment details with the school office before transferring money.";
+  }
+  if (/\\b(hello|hi|hey|habari|good morning|good afternoon)\\b/.test(q)) {
+    return "Hello and welcome to **Gilgil Hills Academy**! I can help with grades, fees, admission requirements, boarding, school location and application enquiries. What would you like to know?";
+  }
+  return "I can answer using the official Gilgil Hills Academy information provided to me. Please ask about **fees, grades, admission requirements, boarding, office hours, payments or the school location**. If a detail is not in the supplied information, I will direct you to the school office rather than guess. Call **0794 952 635** or **0710 308 818**.";
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: "The AI assistant is not connected yet. Please contact the school on WhatsApp at 0794 952 635." },
-        { status: 503 }
-      );
-    }
-
     const body = await request.json();
     const incoming = Array.isArray(body?.messages) ? body.messages : [];
-    const messages = incoming
-      .filter((item: unknown) => item && typeof item === "object")
-      .slice(-12)
-      .map((item: { role?: string; text?: string }) => ({
-        role: item.role === "assistant" ? "model" : "user",
-        parts: [{ text: String(item.text || "").slice(0, 1000) }]
-      }))
-      .filter((item: { role: string; parts: { text: string }[] }) => item.parts[0].text.trim());
+    const latest = [...incoming].reverse().find((item: unknown) =>
+      !!item && typeof item === "object" && typeof (item as { text?: unknown }).text === "string"
+    ) as { text: string } | undefined;
 
-    if (!messages.length || messages[messages.length - 1].role !== "user") {
+    const question = String(latest?.text || "").trim().slice(0, 1000);
+    if (!question) {
       return NextResponse.json({ error: "Please enter a question to get started." }, { status: 400 });
     }
 
-    const latestQuestion = messages[messages.length - 1].parts[0].text;
-    const instantFeeReply = getInstantFeeReply(latestQuestion);
-    if (instantFeeReply) {
-      return NextResponse.json({ reply: instantFeeReply, source: "official-fee-guidance" });
-    }
-
-    const primaryModel = process.env.GEMINI_MODEL || "gemini-3.8-flash";
-    const fallbackModel = "gemini-3.5-flash-lite";
-    const models = [...new Set([primaryModel, fallbackModel])];
-    let result: any = null;
-    let lastErrorMessage = "Gemini request failed";
-    let successfulResponse = false;
-
-    // Try the primary model first. Retry temporary overloads once, then use Flash-Lite.
-    for (const [modelIndex, model] of models.entries()) {
-      const attempts = modelIndex === 0 ? 2 : 1;
-      for (let attempt = 0; attempt < attempts; attempt += 1) {
-        try {
-          const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "x-goog-api-key": apiKey
-              },
-              body: JSON.stringify({
-                systemInstruction: { parts: [{ text: SCHOOL_GUIDANCE }] },
-                contents: messages,
-                generationConfig: { temperature: 0.35, maxOutputTokens: 700 }
-              }),
-              signal: AbortSignal.timeout(15000)
-            }
-          );
-
-          const payload = await response.json().catch(() => ({}));
-          if (response.ok) {
-            result = payload;
-            successfulResponse = true;
-            break;
-          }
-
-          lastErrorMessage = payload?.error?.message || `HTTP ${response.status}`;
-          console.error(`Gemini assistant request failed (${model}):`, response.status, lastErrorMessage);
-
-          // A 503 means temporary overload. A 404 can mean a model is unavailable.
-          // Other client errors, such as an invalid API key, should not be hidden by retries.
-          const canTryAnotherModel = response.status === 503 || response.status === 404;
-          if (!canTryAnotherModel) break;
-        } catch (requestError) {
-          lastErrorMessage = requestError instanceof Error ? requestError.message : "Network request failed";
-          console.error(`Gemini assistant connection error (${model}):`, lastErrorMessage);
-        }
-
-        if (attempt + 1 < attempts) {
-          await new Promise((resolve) => setTimeout(resolve, 700));
-        }
-      }
-
-      if (successfulResponse) break;
-    }
-
-    if (!successfulResponse || !result) {
-      console.error("Hills Assistant exhausted available Gemini models:", lastErrorMessage);
-      return NextResponse.json(
-        { error: "The assistant is busy right now. Please try again in a moment, or contact the school office on 0794 952 635." },
-        { status: 502 }
-      );
-    }
-
-    const reply = result?.candidates?.[0]?.content?.parts
-      ?.map((part: { text?: string }) => part.text || "")
-      .join("")
-      .trim();
-
-    if (!reply) {
-      return NextResponse.json({ error: "I couldn't prepare an answer. Please try again or contact the school office." }, { status: 502 });
-    }
-
-    return NextResponse.json({ reply });
+    return NextResponse.json({
+      reply: getKnowledgeReply(question),
+      source: "gilgil-hills-official-school-information"
+    });
   } catch (error) {
     console.error("Hills Assistant error:", error);
-    return NextResponse.json({ error: "The assistant is temporarily unavailable. Please try again shortly." }, { status: 500 });
+    return NextResponse.json({ error: "The school assistant is temporarily unavailable. Please try again or contact 0794 952 635." }, { status: 500 });
   }
 }
