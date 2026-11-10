@@ -48,25 +48,68 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Please enter a question to get started." }, { status: 400 });
     }
 
-    const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: SCHOOL_GUIDANCE }] },
-          contents: messages,
-          generationConfig: { temperature: 0.35, maxOutputTokens: 700 }
-        }),
-        signal: AbortSignal.timeout(25000)
-      }
-    );
+    const primaryModel = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+    const fallbackModel = "gemini-3.5-flash-lite";
+    const models = [...new Set([primaryModel, fallbackModel])];
+    let result: any = null;
+    let lastErrorMessage = "Gemini request failed";
+    let successfulResponse = false;
 
-    const result = await response.json();
-    if (!response.ok) {
-      console.error("Gemini assistant request failed:", response.status, result?.error?.message);
-      return NextResponse.json({ error: "I'm having trouble answering at the moment. Please contact the school office on 0794 952 635." }, { status: 502 });
+    // Try the primary model first. Retry temporary overloads once, then use Flash-Lite.
+    for (const [modelIndex, model] of models.entries()) {
+      const attempts = modelIndex === 0 ? 2 : 1;
+      for (let attempt = 0; attempt < attempts; attempt += 1) {
+        try {
+          const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "x-goog-api-key": apiKey
+              },
+              body: JSON.stringify({
+                systemInstruction: { parts: [{ text: SCHOOL_GUIDANCE }] },
+                contents: messages,
+                generationConfig: { temperature: 0.35, maxOutputTokens: 700 }
+              }),
+              signal: AbortSignal.timeout(15000)
+            }
+          );
+
+          const payload = await response.json().catch(() => ({}));
+          if (response.ok) {
+            result = payload;
+            successfulResponse = true;
+            break;
+          }
+
+          lastErrorMessage = payload?.error?.message || `HTTP ${response.status}`;
+          console.error(`Gemini assistant request failed (${model}):`, response.status, lastErrorMessage);
+
+          // A 503 means temporary overload. A 404 can mean a model is unavailable.
+          // Other client errors, such as an invalid API key, should not be hidden by retries.
+          const canTryAnotherModel = response.status === 503 || response.status === 404;
+          if (!canTryAnotherModel) break;
+        } catch (requestError) {
+          lastErrorMessage = requestError instanceof Error ? requestError.message : "Network request failed";
+          console.error(`Gemini assistant connection error (${model}):`, lastErrorMessage);
+        }
+
+        if (attempt + 1 < attempts) {
+          await new Promise((resolve) => setTimeout(resolve, 700));
+        }
+      }
+
+      if (successfulResponse) break;
+    }
+
+    if (!successfulResponse || !result) {
+      console.error("Hills Assistant exhausted available Gemini models:", lastErrorMessage);
+      return NextResponse.json(
+        { error: "The assistant is busy right now. Please try again in a moment, or contact the school office on 0794 952 635." },
+        { status: 502 }
+      );
     }
 
     const reply = result?.candidates?.[0]?.content?.parts
