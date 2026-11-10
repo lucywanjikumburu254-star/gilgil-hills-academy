@@ -1,5 +1,6 @@
 import HeroSlideshow from "./components/HeroSlideshow";
 import HillsAssistant from "./components/HillsAssistant";
+import AdmissionApplicationForm from "./components/AdmissionApplicationForm";
 const cloudinary = "https://res.cloudinary.com/azrvy9ub/image/upload";
 const assets = {
   logo: cloudinary + "/v1794316527/1794316169002.jpg",
@@ -337,6 +338,7 @@ export default function HomePage() {
             <p><b>Need the latest fees or requirements?</b> Contact the admissions office directly. We will share the current approved information with you.</p>
             <a href="#contact">Contact admissions <span>→</span></a>
           </div>
+          <AdmissionApplicationForm />
         </div>
       </section>
 
