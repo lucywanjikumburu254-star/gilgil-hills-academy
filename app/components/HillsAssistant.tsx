@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, ReactNode, useEffect, useRef, useState } from "react";
+import AdmissionApplicationForm from "./AdmissionApplicationForm";
 
 type ChatMessage = { role: "user" | "assistant"; text: string };
 
@@ -51,7 +52,7 @@ function AssistantReply({ text }: { text: string }) {
 }
 const quickQuestions = [
   { label: "Our academics", icon: "▤", prompt: "Tell me about the academic programmes and grade levels." },
-  { label: "Admissions", icon: "▣", prompt: "How do I apply for admission?" },
+  { label: "Apply for admission", icon: "✎", prompt: "I want to apply for admission. Please show me the application form." },
   { label: "School fees", icon: "▱", prompt: "How can I get the current school fees?" },
   { label: "Boarding", icon: "▰", prompt: "Tell me about boarding at the school." },
   { label: "School activities", icon: "▦", prompt: "What school activities and co-curricular opportunities are available?" },
@@ -64,6 +65,7 @@ export default function HillsAssistant() {
   const [sending, setSending] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [error, setError] = useState("");
+  const [showApplicationForm, setShowApplicationForm] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -77,6 +79,11 @@ export default function HillsAssistant() {
     setMessages(nextMessages);
     setInput("");
     setError("");
+    if (/\\b(apply|application|admission form|enrol|enroll|register for admission)\\b/i.test(question)) {
+      setShowApplicationForm(true);
+      setMessages((current) => [...current, { role: "assistant", text: "Certainly! You can start your admission enquiry using the form below. Complete the details and send it to the school admissions team. This is an enquiry, not a confirmation of admission." }]);
+      return;
+    }
     setSending(true);
     try {
       const response = await fetch("/api/assistant", {
@@ -130,6 +137,11 @@ export default function HillsAssistant() {
               </div>
             ))}
             {sending && <div className="hills-message hills-assistant-message"><div className="hills-bubble hills-typing"><i /><i /><i /><span>Thinking…</span></div></div>}
+            {showApplicationForm && (
+              <div className="hills-chat-application">
+                <AdmissionApplicationForm />
+              </div>
+            )}
             {error && <div className="hills-chat-error" role="alert">{error} <a href="https://wa.me/254794952635" target="_blank" rel="noreferrer">Chat with the school on WhatsApp</a></div>}
             {messages.length === 0 && (
               <div className="hills-quick-section">
