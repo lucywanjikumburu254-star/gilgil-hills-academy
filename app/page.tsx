@@ -1,4 +1,5 @@
 import HeroSlideshow from "./components/HeroSlideshow";
+import HillsAssistant from "./components/HillsAssistant";
 const cloudinary = "https://res.cloudinary.com/azrvy9ub/image/upload";
 const assets = {
   logo: cloudinary + "/v1794316527/1794316169002.jpg",
@@ -390,6 +391,8 @@ export default function HomePage() {
         </div>
         <div className="footer-bottom"><div className="container footer-bottom-inner"><span>© {new Date().getFullYear()} Gilgil Hills Academy. All rights reserved.</span><span>Website by <b>DIGITAL KINGDOM MEDIA</b></span></div></div>
       </footer>
+
+      <HillsAssistant />
 
       <a className="whatsapp-float" href="https://wa.me/254794952635" target="_blank" rel="noreferrer" aria-label="Chat with Gilgil Hills Academy on WhatsApp">
         <span>◉</span><small>Chat with us</small>
