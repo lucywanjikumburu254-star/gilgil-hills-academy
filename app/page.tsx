@@ -1,9 +1,18 @@
+const cloudinary = "https://res.cloudinary.com/azrvy9ub/image/upload";
 const assets = {
-  logo: process.env.NEXT_PUBLIC_GHA_LOGO_URL,
-  hero: process.env.NEXT_PUBLIC_GHA_HERO_IMAGE_URL,
-  campus: process.env.NEXT_PUBLIC_GHA_CAMPUS_IMAGE_URL,
-  learners: process.env.NEXT_PUBLIC_GHA_LEARNERS_IMAGE_URL,
-  boarding: process.env.NEXT_PUBLIC_GHA_BOARDING_IMAGE_URL
+  logo: cloudinary + "/v1794316527/1794316169002.jpg",
+  hero: cloudinary + "/v1794316525/1794316196149.jpg",
+  campus: cloudinary + "/v1794316525/1794316203995.jpg",
+  learners: cloudinary + "/v1794316524/1794316211355.jpg",
+  boarding: cloudinary + "/v1794316523/1794316214986.jpg",
+  schoolLife: cloudinary + "/v1794316524/1794316227138.jpg",
+  activities: cloudinary + "/v1794316527/1794316184528.jpg",
+  community: cloudinary + "/v1794316526/1794316187874.jpg",
+  galleryOne: cloudinary + "/v1794316523/1794316235562.jpg",
+  galleryTwo: cloudinary + "/v1794316523/1794316246574.jpg",
+  galleryThree: cloudinary + "/v1794316522/1794316253006.jpg",
+  galleryFour: cloudinary + "/v1794316522/1794316275745.jpg",
+  galleryFive: cloudinary + "/v1794316378/21494.jpg"
 };
 
 function BrandMark() {
@@ -149,7 +158,8 @@ export default function HomePage() {
         <div className="container hero-content">
           <div className="hero-copy">
             <div className="eyebrow eyebrow-light"><span className="eyebrow-line"></span> LEARN · GROW · EXCEL</div>
-            <h1>Rising higher.<br /><em>Every single</em><br />year.</h1>
+            <div className="hero-school-name">GILGIL HILLS ACADEMY</div>
+            <h1><span>rising higher</span><br /><em>every single year.</em></h1>
             <p className="hero-lead">A brighter future begins with a strong foundation.</p>
             <p className="hero-description">
               For over 25 years, Gilgil Hills Academy has been committed to nurturing learners,
@@ -337,8 +347,16 @@ export default function HomePage() {
           </div>
           <div className="gallery-grid">
             <PhotoFrame src={assets.learners} alt="Learners at Gilgil Hills Academy" label="Learner photograph" className="gallery-main" />
-            <PhotoFrame src={assets.campus} alt="Gilgil Hills Academy school campus" label="Campus photograph" />
-            <PhotoFrame src={assets.boarding} alt="Gilgil Hills Academy boarding life" label="School life photograph" />
+            <PhotoFrame src={assets.campus} alt="Gilgil Hills Academy campus" label="Campus photograph" />
+            <PhotoFrame src={assets.boarding} alt="Gilgil Hills Academy boarding" label="Boarding photograph" />
+            <PhotoFrame src={assets.schoolLife} alt="Gilgil Hills Academy school life" label="School life photograph" />
+            <PhotoFrame src={assets.activities} alt="Gilgil Hills Academy activities" label="School activities" />
+            <PhotoFrame src={assets.community} alt="Gilgil Hills Academy community" label="School community" />
+            <PhotoFrame src={assets.galleryOne} alt="Gilgil Hills Academy learners and school activities" label="School moments" />
+            <PhotoFrame src={assets.galleryTwo} alt="Gilgil Hills Academy school activities" label="School activities" />
+            <PhotoFrame src={assets.galleryThree} alt="Gilgil Hills Academy learners" label="Learner moments" />
+            <PhotoFrame src={assets.galleryFour} alt="Gilgil Hills Academy campus and learning" label="Learning moments" />
+            <PhotoFrame src={assets.galleryFive} alt="Gilgil Hills Academy school life" label="School life" />
           </div>
         </div>
       </section>
