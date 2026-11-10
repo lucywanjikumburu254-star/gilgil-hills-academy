@@ -116,3 +116,15 @@
  .hills-quick-grid button{font-size:10px;padding:8px;min-height:44px}
 }
 @media(prefers-reduced-motion:reduce){.hills-chat-launcher,.hills-typing i{animation:none;transition:none}}
+
+
+/* Clear, compact formatting for Hills Assistant answers */
+.hills-assistant-message .hills-bubble{padding:14px 15px;background:#fff;border:1px solid #e5e7eb;box-shadow:0 3px 12px #202a3808}
+.hills-assistant-reply{display:flex;flex-direction:column;gap:7px;color:#28313b}
+.hills-reply-paragraph{font-size:13px;line-height:1.6;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.hills-reply-paragraph strong,.hills-reply-list strong{color:#242a31;font-weight:800}
+.hills-reply-heading{font-size:13px;line-height:1.4;font-weight:800;color:#8f171b;margin:5px 0 0;padding-bottom:5px;border-bottom:1px solid #eceeef}
+.hills-reply-list{margin:0;padding-left:19px;display:flex;flex-direction:column;gap:5px}
+.hills-reply-list li{font-size:12.5px;line-height:1.55;padding-left:2px}
+.hills-reply-list li::marker{color:#b71c1c}
+.hills-user-message .hills-bubble p{font-size:13px;line-height:1.55;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
