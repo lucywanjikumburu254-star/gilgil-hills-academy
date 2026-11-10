@@ -6,7 +6,7 @@ type ChatMessage = { role: "user" | "assistant"; text: string };
 
 
 function formatInline(text: string): ReactNode[] {
-  return text.split(/(\\*\\*[^*]+\\*\\*)/g).map((part, index) => {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, index) => {
     if (part.startsWith("**") && part.endsWith("**")) {
       return <strong key={index}>{part.slice(2, -2)}</strong>;
     }
@@ -15,7 +15,7 @@ function formatInline(text: string): ReactNode[] {
 }
 
 function AssistantReply({ text }: { text: string }) {
-  const lines = text.split("\\n");
+  const lines = text.split("\n");
   const blocks: ReactNode[] = [];
   let listItems: string[] = [];
 
@@ -35,13 +35,13 @@ function AssistantReply({ text }: { text: string }) {
       flushList();
       return;
     }
-    if (/^[-•*]\\s+/.test(line)) {
-      listItems.push(line.replace(/^[-•*]\\s+/, ""));
+    if (/^[-•*]\s+/.test(line)) {
+      listItems.push(line.replace(/^[-•*]\s+/, ""));
       return;
     }
     flushList();
-    if (/^#{1,3}\\s+/.test(line)) {
-      blocks.push(<h4 className="hills-reply-heading" key={index}>{formatInline(line.replace(/^#{1,3}\\s+/, ""))}</h4>);
+    if (/^#{1,3}\s+/.test(line)) {
+      blocks.push(<h4 className="hills-reply-heading" key={index}>{formatInline(line.replace(/^#{1,3}\s+/, ""))}</h4>);
     } else {
       blocks.push(<p className="hills-reply-paragraph" key={index}>{formatInline(line)}</p>);
     }
@@ -49,7 +49,7 @@ function AssistantReply({ text }: { text: string }) {
   flushList();
   return <div className="hills-assistant-reply">{blocks}</div>;
 }
-\nconst quickQuestions = [
+const quickQuestions = [
   { label: "Our academics", icon: "▤", prompt: "Tell me about the academic programmes and grade levels." },
   { label: "Admissions", icon: "▣", prompt: "How do I apply for admission?" },
   { label: "School fees", icon: "▱", prompt: "How can I get the current school fees?" },
