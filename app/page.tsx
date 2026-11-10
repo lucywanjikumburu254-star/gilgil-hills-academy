@@ -1,3 +1,4 @@
+import HeroSlideshow from "./components/HeroSlideshow";
 const cloudinary = "https://res.cloudinary.com/azrvy9ub/image/upload";
 const assets = {
   logo: cloudinary + "/v1794316527/1794316169002.jpg",
@@ -149,14 +150,12 @@ export default function HomePage() {
       </header>
 
       <section className="hero" id="home">
-        <div className="hero-image-wrap" aria-label="Gilgil Hills Academy photo slideshow">
-          <img src={assets.hero} alt="Gilgil Hills Academy" className="hero-image hero-slide hero-slide-one" fetchPriority="high" />
-          <img src={assets.campus} alt="" aria-hidden="true" className="hero-image hero-slide hero-slide-two" />
-          <img src={assets.learners} alt="" aria-hidden="true" className="hero-image hero-slide hero-slide-three" />
-          <img src={assets.community} alt="" aria-hidden="true" className="hero-image hero-slide hero-slide-four" />
-          <div className="hero-image-shade"></div>
-          <div className="hero-slide-indicator" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-        </div>
+        <HeroSlideshow slides={[
+          { src: assets.hero, alt: "Gilgil Hills Academy school life" },
+          { src: assets.campus, alt: "Gilgil Hills Academy campus" },
+          { src: assets.learners, alt: "Learners at Gilgil Hills Academy" },
+          { src: assets.community, alt: "The Gilgil Hills Academy community" }
+        ]} />
         <div className="hero-swoosh hero-swoosh-red"></div>
         <div className="hero-swoosh hero-swoosh-yellow"></div>
         <div className="container hero-content">
