@@ -210,50 +210,77 @@ function getInstantFeeReply(question: string): string | null {
   return null;
 }
 
+function extractKnowledge(startMarker: string, endMarker: string): string {
+  const start = SCHOOL_GUIDANCE.indexOf(startMarker);
+  if (start < 0) return "";
+  const contentStart = start + startMarker.length;
+  const end = endMarker ? SCHOOL_GUIDANCE.indexOf(endMarker, contentStart) : -1;
+  return SCHOOL_GUIDANCE.slice(contentStart, end < 0 ? undefined : end).trim();
+}
+
 function getKnowledgeReply(question: string): string {
   const q = question.toLowerCase();
+  const gradeMatch = q.match(/\b(?:grade|class|g)\s*[1-9]\b|\b(playgroup|pp1|pp2)\b/i);
+  const gradeText = gradeMatch?.[0]?.toLowerCase().replace(/\s+/g, " ") || "";
+  const digit = gradeText.match(/[1-9]/)?.[0];
+  const gradeNumber = digit ? Number(digit) : null;
+  const isEcde = /playgroup|pp1|pp2|ecde|pre.?primary/.test(q);
+  const isPrimary = (gradeNumber !== null && gradeNumber >= 1 && gradeNumber <= 6) || isEcde || /primary/.test(q);
+  const isJss = (gradeNumber !== null && gradeNumber >= 7) || /junior secondary|\bjss\b/.test(q);
+  const isBoy = /\b(boy|boys|son|male)\b/.test(q);
+  const isGirl = /\b(girl|girls|daughter|female)\b/.test(q);
+  const asksRequirements = /requirement|requirements|what.*bring|shopping|uniform|items|checklist|packing|bedding/.test(q);
+  const asksPayment = /pay|payment|paybill|bank|account number|deposit|where.*pay/.test(q);
   const fees = getInstantFeeReply(question);
   if (fees) return fees;
 
-  if (/\\b(where|location|located|address|directions|wapi|mahali)\\b/.test(q)) {
-    return "Gilgil Hills Academy is off the Gilgil–Nyahururu Road, about 2 km towards the Anti-Stock Theft Unit, Gilgil, Nakuru County. You can call **0794 952 635** or **0710 308 818** for directions.";
+  if (asksRequirements) {
+    if (!isBoy && !isGirl) return "I can share the complete official checklist. Is the learner a **boy or a girl**?";
+    if (isJss) {
+      const section = isBoy
+        ? extractKnowledge("JSS BOYS' ADMISSION REQUIREMENTS", "JSS GIRLS' ADMISSION REQUIREMENTS")
+        : extractKnowledge("JSS GIRLS' ADMISSION REQUIREMENTS", "JSS BOARDING RULES AND REPORTING");
+      return "**Junior Secondary " + (isBoy ? "boys'" : "girls'") + " admission checklist**\n" + section + "\n\nAll clothes, towels and bedding should be labelled with the learner's name and admission number. JSS opening-day reporting is **9:00am–4:00pm**.";
+    }
+    if (isPrimary) {
+      const section = isBoy
+        ? extractKnowledge("Primary boys' uniform list:", "Primary girls' uniform list:")
+        : extractKnowledge("Primary girls' uniform list:", "The primary DOCX states opening-day reporting");
+      return "**Primary " + (isBoy ? "boys'" : "girls'") + " boarding requirements**\n" + section + "\n\nPrimary opening-day reporting is **9:00am–5:00pm**. Follow the reporting date on the learner's admission letter.";
+    }
+    if (isEcde) {
+      return "**ECDE requirements**\n- Girls: red tracksuit; boys: navy-blue tracksuit.\n- Yellow T-shirt.\n- 3 exercise books (120 pages) for homework.\n- 6 covers, 1 packet of wipes, 4 tissue papers and 1 jumbo packet of crayons.\n\nPlease contact the school office to confirm any additional items.";
+    }
+    return "Please tell me the learner's **grade** (Playgroup, PP1, PP2 or Grade 1–9) so I can share the correct checklist.";
   }
-  if (/\\b(contact|phone|telephone|call|whatsapp|email|reach)\\b/.test(q)) {
-    return "You can contact Gilgil Hills Academy on **0794 952 635** or **0710 308 818**. Email: **Gilgilhillsacademy2026@gmail.com**.";
-  }
-  if (/\\b(hour|hours|open|office time|working time|when.*office)\\b/.test(q)) {
-    return "The school office hours are **Monday–Friday, 8:00am–4:00pm**, and **Saturday, 9:00am–12:00pm**. These are office hours, not learner reporting hours.";
-  }
-  if (/\\b(motto|slogan)\\b/.test(q)) {
-    return "The school motto is **“Excellence in All We Do.”**";
-  }
-  if (/\\b(grade|class|level|section|academic|programme|program|school offer|curriculum)\\b/.test(q)) {
-    return "Gilgil Hills Academy offers **Pre-Primary (Playgroup, PP1 and PP2)**, **Lower Primary (Grades 1–3)**, **Upper Primary (Grades 4–6)** and **Junior Secondary (Grades 7–9)**. Day-school and boarding options are available in the relevant sections. Which grade are you enquiring about?";
-  }
-  if (/\\b(boarding|boarder|dorm|hostel)\\b/.test(q)) {
-    return "Gilgil Hills Academy offers boarding, with separate boys' and girls' boarding arrangements in Junior Secondary. Boarding requirements and fees differ by section and gender. Tell me the learner's **grade** and whether the learner is a **boy or girl**, and I can share the relevant information.";
-  }
-  if (/\\b(requirement|requirements|what.*bring|shopping|uniform|items|checklist)\\b/.test(q)) {
-    return "I can share the official admission checklist. Please tell me the learner's **grade** and whether the learner is a **boy or girl** so I give you the correct list. Boys' and girls' requirements are different.";
-  }
-  if (/\\b(apply|application|admission|enrol|enroll|register|join|vacanc|admit)\\b/.test(q)) {
-    return "To begin an admission enquiry, use the **Apply for admission** form in this chat. Complete the parent/guardian and learner details, then submit it. The form sends an enquiry to the school's admissions email when email delivery is configured. Submission is not confirmation of a place.";
-  }
-  if (/\\b(transport|bus|pick.?up|drop.?off)\\b/.test(q)) {
-    return "The information currently provided to me does not include confirmed transport routes or charges. Please contact the school office on **0794 952 635** or **0710 308 818** for the latest details.";
-  }
-  if (/\\b(activity|activities|club|clubs|sports|games|co.?curricular)\\b/.test(q)) {
-    return "Junior Secondary learners are required to join at least one club. For the current list of clubs, sports and activities across the school, please confirm with the school office on **0794 952 635**.";
-  }
-  if (/\\b(pay|payment|paybill|bank|account number|deposit)\\b/.test(q)) {
-    return "Payment details depend on the learner's section and the type of fee. Please tell me the **grade** and whether the learner is a **day scholar or boarder**. For safety, always verify payment details with the school office before transferring money.";
-  }
-  if (/\\b(hello|hi|hey|habari|good morning|good afternoon)\\b/.test(q)) {
-    return "Hello and welcome to **Gilgil Hills Academy**! I can help with grades, fees, admission requirements, boarding, school location and application enquiries. What would you like to know?";
-  }
-  return "I can answer using the official Gilgil Hills Academy information provided to me. Please ask about **fees, grades, admission requirements, boarding, office hours, payments or the school location**. If a detail is not in the supplied information, I will direct you to the school office rather than guess. Call **0794 952 635** or **0710 308 818**.";
-}
 
+  if (asksPayment) {
+    if (isJss || (gradeNumber !== null && gradeNumber >= 7)) {
+      return "**JSS school-fee payment options**\n- Co-operative Bank: 01129115604000\n- KCB: 1106201876\n- Equity Bank: 0770292149514\n- Paybill **504650**; account/reference: learner's admission number or learner's name and class.\n\nFor non-fee items such as trips, assessment rubrics, diaries and milk: **Absa Paybill 303030**, account **8353#** followed by learner's name and grade. Cash and personal cheques are not accepted. Please verify details with the school office before paying.";
+    }
+    if (isPrimary || isEcde) {
+      return "**Primary / ECDE payment options**\n- KCB: 1106201876\n- Equity Bank: 0770292149514\n- Paybill **504650**; account/reference: learner's name and class.\n\nThe primary admission document contains a Co-operative Bank number that conflicts with the newer JSS letter, so I will not provide that number for primary payments. Please confirm it directly with the school office before paying.";
+    }
+    return "Payment details depend on the learner's section. Please tell me the learner's **grade** (Playgroup–Grade 9) so I can give the relevant payment instructions. Always verify details with the school office before transferring money.";
+  }
+
+  if (/report|reporting time|opening day|arrival time/.test(q)) {
+    if (isJss) return "Junior Secondary learners should report on opening days between **9:00am and 4:00pm**, as stated in the 2026 JSS admission letters. Follow the date on the learner's own admission letter.";
+    if (isPrimary) return "Primary learners should report on opening days between **9:00am and 5:00pm**, as stated in the primary admission letter. Follow the date on the learner's own admission letter.";
+    return "Reporting time depends on the learner's section: **JSS 9:00am–4:00pm**; **Primary 9:00am–5:00pm**. Please follow the date and instructions on the learner's admission letter.";
+  }
+  if (/where|location|located|address|directions|wapi|mahali/.test(q)) return "Gilgil Hills Academy is off the Gilgil–Nyahururu Road, about 2 km towards the Anti-Stock Theft Unit, Gilgil, Nakuru County. Call **0794 952 635** or **0710 308 818** for directions.";
+  if (/contact|phone|telephone|call|whatsapp|email|reach/.test(q)) return "Contact Gilgil Hills Academy on **0794 952 635** or **0710 308 818**. Admissions email: **Gilgilhillsacademy2026@gmail.com**.";
+  if (/hour|hours|open|office time|working time|when.*office/.test(q)) return "School office hours are **Monday–Friday, 8:00am–4:00pm**, and **Saturday, 9:00am–12:00pm**. These are office hours, not learner reporting hours.";
+  if (/motto|slogan/.test(q)) return "The school motto is **“Excellence in All We Do.”**";
+  if (/grade|class|level|section|academic|programme|program|school offer|curriculum/.test(q)) return "Gilgil Hills Academy offers **Pre-Primary (Playgroup, PP1 and PP2)**, **Lower Primary (Grades 1–3)**, **Upper Primary (Grades 4–6)** and **Junior Secondary (Grades 7–9)**. Day-school and boarding options are available in the relevant sections. Which grade are you enquiring about?";
+  if (/boarding|boarder|dorm|hostel/.test(q)) return "Gilgil Hills Academy offers boarding, with separate boys' and girls' boarding arrangements in Junior Secondary. Primary boarding is also described in the admission letter. Fees and packing requirements differ by section and gender. Tell me the learner's **grade** and whether the learner is a **boy or girl**, and I can share the correct information.";
+  if (/apply|application|admission|enrol|enroll|register|join|vacanc|admit/.test(q)) return "To start an admission enquiry, choose **Apply for admission** in this chat or use the application form on the website. Complete the parent/guardian and learner details and submit it. This is an enquiry only, not confirmation of a place.";
+  if (/transport|bus|pick.?up|drop.?off/.test(q)) return "The supplied information does not include confirmed transport routes or charges. Please contact the school office on **0794 952 635** or **0710 308 818** for the latest details.";
+  if (/activity|activities|club|clubs|sports|games|co.?curricular/.test(q)) return "Junior Secondary learners are required to join at least one club. For the current list of clubs, sports and activities across the school, please confirm with the school office on **0794 952 635**.";
+  if (/hello|hi|hey|habari|good morning|good afternoon/.test(q)) return "Hello and welcome to **Gilgil Hills Academy**! I can help with grades, fees, admission requirements, boarding, school rules, reporting times, payments, office hours and the school location. What would you like to know?";
+  return "I can answer using the official Gilgil Hills Academy information provided to me. Ask me about **fees, boarding requirements, uniforms, what to pack, payment methods, reporting times, school rules, grades or admission applications**. If a detail is not in the supplied information, I will direct you to the school office rather than guess. Call **0794 952 635** or **0710 308 818**.";
+}
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
