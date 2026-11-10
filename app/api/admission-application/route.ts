@@ -6,7 +6,8 @@ function clean(value: unknown, max = 1500): string {
   return typeof value === "string" ? value.trim().slice(0, max) : "";
 }
 function escapeHtml(value: string): string {
-  return value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char] || char));
+  const entities: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+  return value.replace(/[&<>"']/g, (char) => entities[char]);
 }
 
 export async function POST(request: NextRequest) {
@@ -16,12 +17,14 @@ export async function POST(request: NextRequest) {
     const guardianName = clean(body.guardianName, 100);
     const phone = clean(body.phone, 30);
     const email = clean(body.email, 150);
-    const learnerName = clean(body.learnerName, 100);
+    const learnerName = clean(body.learnerName, 100).replace(/[\\r\\n]/g, " ");
     const grade = clean(body.grade, 30);
     const attendance = clean(body.attendance, 30);
     const previousSchool = clean(body.previousSchool, 150);
     const message = clean(body.message, 1500);
-    if (!guardianName || !phone || !learnerName || !grade || !attendance || body.consent !== true) {
+    const validGrades = ["Playgroup", "PP1", "PP2", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8", "Grade 9"];
+    const validAttendance = ["Day scholar", "Boarder", "Not sure yet"];
+    if (!guardianName || !phone || !learnerName || !validGrades.includes(grade) || !validAttendance.includes(attendance) || body.consent !== true) {
       return NextResponse.json({ error: "Please complete all required fields and accept the consent notice." }, { status: 400 });
     }
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
