@@ -242,14 +242,14 @@ function getKnowledgeReply(question: string): string {
         : extractKnowledge("JSS GIRLS' ADMISSION REQUIREMENTS", "JSS BOARDING RULES AND REPORTING");
       return "**Junior Secondary " + (isBoy ? "boys'" : "girls'") + " admission checklist**\n" + section + "\n\nAll clothes, towels and bedding should be labelled with the learner's name and admission number. JSS opening-day reporting is **9:00am–4:00pm**.";
     }
+    if (isEcde) {
+      return "**ECDE requirements**\n- Girls: red tracksuit; boys: navy-blue tracksuit.\n- Yellow T-shirt.\n- 3 exercise books (120 pages) for homework.\n- 6 covers, 1 packet of wipes, 4 tissue papers and 1 jumbo packet of crayons.\n\nPlease contact the school office to confirm any additional items.";
+    }
     if (isPrimary) {
       const section = isBoy
         ? extractKnowledge("Primary boys' uniform list:", "Primary girls' uniform list:")
         : extractKnowledge("Primary girls' uniform list:", "The primary DOCX states opening-day reporting");
       return "**Primary " + (isBoy ? "boys'" : "girls'") + " boarding requirements**\n" + section + "\n\nPrimary opening-day reporting is **9:00am–5:00pm**. Follow the reporting date on the learner's admission letter.";
-    }
-    if (isEcde) {
-      return "**ECDE requirements**\n- Girls: red tracksuit; boys: navy-blue tracksuit.\n- Yellow T-shirt.\n- 3 exercise books (120 pages) for homework.\n- 6 covers, 1 packet of wipes, 4 tissue papers and 1 jumbo packet of crayons.\n\nPlease contact the school office to confirm any additional items.";
     }
     return "Please tell me the learner's **grade** (Playgroup, PP1, PP2 or Grade 1–9) so I can share the correct checklist.";
   }
