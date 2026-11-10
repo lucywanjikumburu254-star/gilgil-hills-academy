@@ -79,7 +79,7 @@ export default function HillsAssistant() {
     setMessages(nextMessages);
     setInput("");
     setError("");
-    if (/\\b(apply|application|admission form|enrol|enroll|register for admission)\\b/i.test(question)) {
+    if (/\b(apply|application|admission form|enrol|enroll|register for admission|join)\b/i.test(question)) {
       setShowApplicationForm(true);
       setMessages((current) => [...current, { role: "assistant", text: "Certainly! You can start your admission enquiry using the form below. Complete the details and send it to the school admissions team. This is an enquiry, not a confirmation of admission." }]);
       return;
