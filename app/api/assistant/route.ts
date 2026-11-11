@@ -179,6 +179,10 @@ function normalizeQuestion(question: string): string {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/\b(garde|grde)\b/g, "grade")
+    .replace(/\bdarasa la\b/g, "grade")
+    .replace(/\bbweni\b/g, "boarding")
+    .replace(/\bkutwa\b/g, "day")
+    .replace(/\b(karo|ada ya shule)\b/g, "fees")
     .replace(/\b(fee structure|fees structure|fee schedule)\b/g, "fees")
     .replace(/\b(bording|bordng)\b/g, "boarding")
     .replace(/\b(day scholar|day student|day pupil|day learner)\b/g, "day")
@@ -203,7 +207,7 @@ function extractGradeNumber(question: string): number | null {
 
 function getInstantFeeReply(question: string): string | null {
   const q = normalizeQuestion(question);
-  const asksFees = /\b(fee|fees|school fee|school fees|cost|how much|gharama|ada|charges|tuition)\b/.test(q);
+  const asksFees = /\b(fee|fees|school fee|school fees|cost|how much|gharama|ada|karo|charges|tuition)\b/.test(q);
   if (!asksFees) return null;
 
   const isDay = /\b(day|day school|day scholar)\b/.test(q);
