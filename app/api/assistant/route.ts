@@ -253,8 +253,8 @@ function getKnowledgeReply(question: string): string {
   const isJss = (gradeNumber !== null && gradeNumber >= 7) || /junior secondary|\bjss\b/.test(q);
   const isBoy = /\b(boy|boys|son|male)\b/.test(q);
   const isGirl = /\b(girl|girls|daughter|female)\b/.test(q);
-  const asksRequirements = /requirement|requirements|what.*bring|shopping|uniform|items|checklist|packing|bedding/.test(q);
-  const asksPayment = /pay|payment|paybill|bank|account number|deposit|where.*pay/.test(q);
+  const asksRequirements = /requirement|requirements|mahitaji|what.*(bring|carry|pack|need)|shopping|uniform|items|checklist|packing|bedding|vitu vya kuleta|nini.*leta/.test(q);
+  const asksPayment = /pay|payment|paybill|bank|account number|deposit|where.*pay|malipo|kulipa|lipa/.test(q);
   const fees = getInstantFeeReply(question);
   if (fees) return fees;
 
