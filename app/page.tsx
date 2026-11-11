@@ -114,7 +114,7 @@ export default function HomePage() {
           <div className="topline-contact">
             <a href="tel:+254794952635">0794 952 635</a>
             <span className="topline-dot">•</span>
-            <a href="mailto:info@gilgilhills.com">info@gilgilhills.com</a>
+            <a href="mailto:gilgilhillsacademy2026@gmail.com">gilgilhillsacademy2026@gmail.com</a>
           </div>
         </div>
       </div>
@@ -377,7 +377,7 @@ export default function HomePage() {
           </div>
           <div className="contact-details">
             <div className="contact-item"><span className="contact-icon">☎</span><div><small>CALL OUR OFFICE</small><a href="tel:+254794952635">0794 952 635</a><a href="tel:+254710308818">0710 308 818</a></div></div>
-            <div className="contact-item"><span className="contact-icon">✉</span><div><small>EMAIL US</small><a href="mailto:info@gilgilhills.com">info@gilgilhills.com</a></div></div>
+            <div className="contact-item"><span className="contact-icon">✉</span><div><small>EMAIL US</small><a href="mailto:gilgilhillsacademy2026@gmail.com">gilgilhillsacademy2026@gmail.com</a></div></div>
             <div className="contact-item"><span className="contact-icon">⌖</span><div><small>FIND US</small><span>Off Gilgil–Nyahururu Road,<br />Gilgil, Nakuru County, Kenya</span><a className="map-link" href="https://www.google.com/maps/search/?api=1&query=Gilgil+Hills+Academy+Gilgil+Kenya" target="_blank" rel="noreferrer">Get directions ↗</a></div></div>
             <div className="contact-item"><span className="contact-icon">◷</span><div><small>OFFICE HOURS</small><span>Monday – Friday: 8:00am – 4:00pm<br />Saturday: 9:00am – 12:00pm</span></div></div>
           </div>
@@ -388,7 +388,7 @@ export default function HomePage() {
         <div className="container footer-main">
           <div className="footer-brand"><BrandMark /><p>Learning with purpose. Growing with confidence. <b>Excellence in All We Do.</b></p></div>
           <div className="footer-links"><span>EXPLORE</span><a href="#about">About us</a><a href="#schools">Our schools</a><a href="#academics">Academics</a><a href="#boarding">Boarding</a></div>
-          <div className="footer-links"><span>GET IN TOUCH</span><a href="#admissions">Admissions</a><a href="#gallery">Gallery</a><a href="#contact">Contact us</a><a href="mailto:info@gilgilhills.com">Email the school</a></div>
+          <div className="footer-links"><span>GET IN TOUCH</span><a href="#admissions">Admissions</a><a href="#gallery">Gallery</a><a href="#contact">Contact us</a><a href="mailto:gilgilhillsacademy2026@gmail.com">Email the school</a></div>
           <div className="footer-contact"><span>CALL THE SCHOOL</span><a href="tel:+254794952635">0794 952 635</a><a href="tel:+254710308818">0710 308 818</a><a href="https://wa.me/254794952635" target="_blank" rel="noreferrer">WhatsApp us ↗</a></div>
         </div>
         <div className="footer-bottom"><div className="container footer-bottom-inner"><span>© {new Date().getFullYear()} Gilgil Hills Academy. All rights reserved.</span><span>Website by <b>DIGITAL KINGDOM MEDIA</b></span></div></div>
