@@ -177,15 +177,15 @@ function normalizeQuestion(question: string): string {
   return question
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[\\u0300-\\u036f]/g, "")
-    .replace(/\\bgarde\\b|\\bgrde\\b/g, "grade")
-    .replace(/\\bfee structure\\b|\\bfees structure\\b|\\bfee schedule\\b/g, "fees")
-    .replace(/\\bbording\\b|\\bbordng\\b/g, "boarding")
-    .replace(/\\bday scholar\\b|\\bday student\\b|\\bday pupil\\b|\\bday learner\\b/g, "day")
-    .replace(/\\bboarder\\b|\\bboarding student\\b/g, "boarding")
-    .replace(/\\bstd\\s*(?=[1-9])/g, "grade ")
-    .replace(/[^a-z0-9\\s]/g, " ")
-    .replace(/\\s+/g, " ")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\b(garde|grde)\b/g, "grade")
+    .replace(/\b(fee structure|fees structure|fee schedule)\b/g, "fees")
+    .replace(/\b(bording|bordng)\b/g, "boarding")
+    .replace(/\b(day scholar|day student|day pupil|day learner)\b/g, "day")
+    .replace(/\b(boarder|boarding student)\b/g, "boarding")
+    .replace(/\bstd\s*(?=[1-9])/g, "grade ")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
@@ -195,22 +195,21 @@ function extractGradeNumber(question: string): number | null {
     one: 1, two: 2, three: 3, four: 4, five: 5,
     six: 6, seven: 7, eight: 8, nine: 9
   };
-  const match = q.match(/\\b(?:grade|class|standard|form)\\s*(1|2|3|4|5|6|7|8|9|one|two|three|four|five|six|seven|eight|nine)\\b/);
+  const match = q.match(/\b(?:grade|class|standard|form)\s*(1|2|3|4|5|6|7|8|9|one|two|three|four|five|six|seven|eight|nine)\b/);
   if (!match) return null;
   const value = match[1];
-  return /^\\d$/.test(value) ? Number(value) : words[value] ?? null;
+  return /^\d$/.test(value) ? Number(value) : words[value] ?? null;
 }
 
 function getInstantFeeReply(question: string): string | null {
-  const q = question.toLowerCase();
-  const asksFees = /\b(fee|fees|school fee|school fees|cost|how much|gharama|ada)\b/.test(q);
+  const q = normalizeQuestion(question);
+  const asksFees = /\b(fee|fees|school fee|school fees|cost|how much|gharama|ada|charges|tuition)\b/.test(q);
   if (!asksFees) return null;
 
-  const isDay = /\b(day scholar|day school|day student|day pupil|day learner)\b/.test(q);
-  const isBoarder = /\b(boarder|boarding|boarding school|boarding student)\b/.test(q);
-  const gradeMatch = q.match(/\bgrade\s*([1-9])\b/);
-  const grade = gradeMatch ? Number(gradeMatch[1]) : null;
-  const isEcde = /\b(ecde|playgroup|pp1|pp2|pre.primary)\b/.test(q);
+  const isDay = /\b(day|day school|day scholar)\b/.test(q);
+  const isBoarder = /\b(boarding|boarder)\b/.test(q);
+  const grade = extractGradeNumber(q);
+  const isEcde = /\b(ecde|playgroup|pp1|pp2|pre primary)\b/.test(q);
   const isJss = /\b(jss|junior secondary|junior school)\b/.test(q);
 
   if (isEcde) {
@@ -247,11 +246,8 @@ function extractKnowledge(startMarker: string, endMarker: string): string {
 }
 
 function getKnowledgeReply(question: string): string {
-  const q = question.toLowerCase();
-  const gradeMatch = q.match(/\b(?:grade|class|g)\s*[1-9]\b|\b(playgroup|pp1|pp2)\b/i);
-  const gradeText = gradeMatch?.[0]?.toLowerCase().replace(/\s+/g, " ") || "";
-  const digit = gradeText.match(/[1-9]/)?.[0];
-  const gradeNumber = digit ? Number(digit) : null;
+  const q = normalizeQuestion(question);
+  const gradeNumber = extractGradeNumber(q);
   const isEcde = /playgroup|pp1|pp2|ecde|pre.?primary/.test(q);
   const isPrimary = (gradeNumber !== null && gradeNumber >= 1 && gradeNumber <= 6) || isEcde || /primary/.test(q);
   const isJss = (gradeNumber !== null && gradeNumber >= 7) || /junior secondary|\bjss\b/.test(q);
